@@ -5,42 +5,37 @@ b = 0
 setp = 0
 
 #参数调整
-def charge(item, study_r=1): #学习率初始化为1
+def adjust(item, study_r=1): #学习率初始化为1
     global w, b, setp
     for i in range(len(item[0])):
         w[i] += study_r * item[1] * item[0][i]
     b += item[1]
     setp += 1
 
-def cal(item):
-    """
-    calculate the functional distance between 'item' an the dicision surface. output yi(w*xi+b).
-    """
-    res = 0
+def mis_value(item):
+    #误分类值计算，该值小于等于时表示当前存在误分类点
+    value = 0
     for i in range(len(item[0])):
-        res += item[0][i] * w[i]
-    res += b
-    res *= item[1]
-    return res
+        value += item[0][i] * w[i]
+    value += b
+    value *= item[1]
+    return value
 
-def check():
-    """
-    check if the hyperplane can classify the examples correctly
-    """
+def decide(datas):
     flag = False
-    for item in training_set:
-        if cal(item) <= 0:
-            res = cal(item)
+    for item in datas:
+        mis = mis_value(item)
+        if mis <= 0:
             flag = True
-            charge(item)
-            print setp, item, w, b,res
+            adjust(item)
+            print setp, item, w, b,mis
     if not flag:
-        print setp, item, w, b
-        print "最终得到超平面相关参数： w= " + str(w) + ",  b=" + str(b)
+        print setp+1, item, w, b,mis
+        print "\n最终得到超平面相关参数：\n w= " + str(w) + ",  b=" + str(b)
     return flag
 
 if __name__ == "__main__":
-    training_set = [[(3, 3), 1], [(4, 3), 1], [(1, 1), -1]]
-    print '迭代次数', '误分类值', '权值w', '截距b'
-    while check():
-        pass
+    training_set = [[(3, 3), 1], [(4, 3), 1], [(1, 1), -1]]  #以书本中的数据集为例
+    print '迭代次数', '误分类值', '权值w', '截距b', '判断值'
+    while decide(training_set):
+        continue
